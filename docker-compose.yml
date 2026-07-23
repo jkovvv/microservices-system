@@ -1,0 +1,65 @@
+services:
+
+  users-db:
+    image: postgres:17
+    container_name: users-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: users
+    ports:
+      - "5432:5432"
+    volumes:
+      - users-data:/var/lib/postgresql/data
+      - ./database/users-init.sql:/docker-entrypoint-initdb.d/users-init.sql
+
+
+  products-db:
+    image: postgres:17
+    container_name: products-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: products
+    ports:
+      - "5433:5432"
+    volumes:
+      - products-data:/var/lib/postgresql/data
+      - ./database/products-init.sql:/docker-entrypoint-initdb.d/products-init.sql
+
+
+  user-service:
+    build:
+      context: ../UserService
+    container_name: user-service
+    depends_on:
+      - users-db
+    ports:
+      - "9001:9001"
+
+
+  product-service:
+    build:
+      context: ../ProductService
+    container_name: product-service
+    depends_on:
+      - products-db
+    ports:
+      - "9002:9002"
+
+
+  api-gateway:
+    build:
+      context: ../APIGateway
+    container_name: api-gateway
+    depends_on:
+      - user-service
+      - product-service
+    ports:
+      - "8080:8080"
+
+
+volumes:
+
+  users-data:
+  products-data:
