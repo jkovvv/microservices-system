@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
 
   users-db:
@@ -55,6 +57,17 @@ services:
     depends_on:
       - user-service
       - product-service
+    ports:
+      - "9000:9000"
+
+
+  load-balancer:
+    build:
+      context: ../LoadBalancer
+    container_name: load-balancer
+    command: ["java", "-cp", "out", "lb.LoadBalancer"]
+    depends_on:
+      - api-gateway
     ports:
       - "8080:8080"
 
